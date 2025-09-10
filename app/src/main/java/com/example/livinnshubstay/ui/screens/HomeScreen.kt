@@ -16,11 +16,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocationOn
@@ -38,6 +39,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+
+import androidx.navigation.compose.rememberNavController
+import com.example.livinnshubstay.navigation.BottomNavItem
 import com.example.livinnshubstay.ui.components.ActionButton
 import com.example.livinnshubstay.ui.components.CircularIconButton
 import com.example.livinnshubstay.ui.components.DarkCard
@@ -50,10 +55,20 @@ import com.example.livinnshubstay.ui.theme.TextGrey
 import com.example.livinnshubstay.ui.theme.VibrantPurple
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController = rememberNavController()) {
     Scaffold(
         bottomBar = {
-            BottomNavigationBar()
+            BottomNavigationBar(
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         LazyColumn(
@@ -312,7 +327,10 @@ fun DestinationCard(
 }
 
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(
+    onNavigate: (String) -> Unit = {},
+    selectedItem: BottomNavItem = BottomNavItem.HOME
+) {
     BottomAppBar(
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -322,42 +340,47 @@ fun BottomNavigationBar() {
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { /* Handle click */ }) {
+            // Account
+            IconButton(onClick = { onNavigate(BottomNavItem.ACCOUNT.route) }) {
                 Icon(
-                    imageVector = Icons.Default.Home,
-                    contentDescription = "Home",
-                    tint = VibrantPurple
+                    imageVector = BottomNavItem.ACCOUNT.icon,
+                    contentDescription = BottomNavItem.ACCOUNT.title,
+                    tint = if (selectedItem == BottomNavItem.ACCOUNT) VibrantPurple else TextGrey
                 )
             }
             
-            IconButton(onClick = { /* Handle click */ }) {
+            // Maintenance
+            IconButton(onClick = { onNavigate(BottomNavItem.MAINTENANCE.route) }) {
                 Icon(
-                    imageVector = Icons.Outlined.Favorite,
-                    contentDescription = "Favorites",
-                    tint = TextGrey
+                    imageVector = BottomNavItem.MAINTENANCE.icon,
+                    contentDescription = BottomNavItem.MAINTENANCE.title,
+                    tint = if (selectedItem == BottomNavItem.MAINTENANCE) VibrantPurple else TextGrey
                 )
             }
             
-            // Center FAB
+            // Home (Center FAB)
             PrimaryActionFAB(
-                icon = Icons.Default.QrCode,
-                contentDescription = "Scan QR",
-                onClick = { /* Handle click */ }
+                icon = BottomNavItem.HOME.icon,
+                contentDescription = BottomNavItem.HOME.title,
+                onClick = { onNavigate(BottomNavItem.HOME.route) },
+                isSelected = selectedItem == BottomNavItem.HOME
             )
             
-            IconButton(onClick = { /* Handle click */ }) {
+            // Complaint
+            IconButton(onClick = { onNavigate(BottomNavItem.COMPLAINT.route) }) {
                 Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = TextGrey
+                    imageVector = BottomNavItem.COMPLAINT.icon,
+                    contentDescription = BottomNavItem.COMPLAINT.title,
+                    tint = if (selectedItem == BottomNavItem.COMPLAINT) VibrantPurple else TextGrey
                 )
             }
             
-            IconButton(onClick = { /* Handle click */ }) {
+            // Profile
+            IconButton(onClick = { onNavigate(BottomNavItem.PROFILE.route) }) {
                 Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    tint = TextGrey
+                    imageVector = BottomNavItem.PROFILE.icon,
+                    contentDescription = BottomNavItem.PROFILE.title,
+                    tint = if (selectedItem == BottomNavItem.PROFILE) VibrantPurple else TextGrey
                 )
             }
         }

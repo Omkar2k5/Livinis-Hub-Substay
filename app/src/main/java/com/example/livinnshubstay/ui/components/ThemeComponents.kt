@@ -193,11 +193,12 @@ fun PrimaryActionFAB(
     icon: ImageVector,
     contentDescription: String?,
     onClick: () -> Unit,
+    isSelected: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     FloatingActionButton(
         onClick = onClick,
-        containerColor = VibrantPurple,
+        containerColor = if (isSelected) VibrantPurple else VibrantPurple.copy(alpha = 0.7f),
         contentColor = TextWhite,
         shape = CircleShape,
         modifier = modifier

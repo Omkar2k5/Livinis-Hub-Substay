@@ -17,26 +17,31 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.airbnb.lottie.compose.*
 import com.example.livinnshubstay.data.AuthEvent
+import com.example.livinnshubstay.ui.theme.*
 import com.example.livinnshubstay.viewmodel.AuthViewModel
+
+// Dummy credentials for testing
+const val DUMMY_EMAIL = "user@example.com"
+const val DUMMY_PASSWORD = "password123"
 
 @Composable
 fun LoginScreen(
     authViewModel: AuthViewModel,
-    onNavigateToDashboard: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToSignUp: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
@@ -54,7 +59,7 @@ fun LoginScreen(
     // Handle successful login
     LaunchedEffect(authState.isAuthenticated) {
         if (authState.isAuthenticated) {
-            onNavigateToDashboard()
+            onNavigateToHome()
         }
     }
     
@@ -72,14 +77,7 @@ fun LoginScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF1565C0), // Deep blue
-                        Color(0xFF00838F)  // Teal
-                    )
-                )
-            )
+            .background(DeepDarkBackground)
     ) {
         AnimatedVisibility(
             visible = isVisible,
@@ -97,21 +95,37 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 
-                // Lottie Animation Placeholder
-                LottieAnimationPlaceholder(
+                // Logo Animation
+                LogoAnimation(
                     modifier = Modifier
-                        .size(200.dp)
-                        .padding(bottom = 32.dp)
+                        .size(120.dp)
+                        .padding(bottom = 24.dp)
                 )
                 
-                // App Title
+                // App Title with Highlight
                 Text(
-                    text = "Livinns Hub Stay",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    text = buildAnnotatedString {
+                        append("Welcome to ")
+                        withStyle(
+                            style = SpanStyle(
+                                color = NeonGreen,
+                                fontWeight = FontWeight.Bold
+                            )
+                        ) {
+                            append("Livinns Hub")
+                        }
+                    },
+                    style = MaterialTheme.typography.displayMedium,
+                    color = TextWhite,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 48.dp)
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                Text(
+                    text = "Sign in to continue",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = TextGrey,
+                    modifier = Modifier.padding(bottom = 32.dp)
                 )
                 
                 // Login Form
@@ -119,9 +133,9 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .offset(x = shakeOffset.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White.copy(alpha = 0.95f)
+                        containerColor = DarkGrey
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                 ) {
@@ -133,7 +147,7 @@ fun LoginScreen(
                     ) {
                         
                         // Email Field
-                        CustomTextField(
+                        ThemeTextField(
                             value = email,
                             onValueChange = { email = it },
                             label = "Email",
@@ -145,7 +159,7 @@ fun LoginScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         
                         // Password Field
-                        CustomTextField(
+                        ThemeTextField(
                             value = password,
                             onValueChange = { password = it },
                             label = "Password",
@@ -156,12 +170,25 @@ fun LoginScreen(
                             hasError = authState.errorMessage.isNotEmpty()
                         )
                         
+                        // Forgot Password
+                        Text(
+                            text = "Forgot Password?",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = VibrantPurple,
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .padding(top = 8.dp)
+                                .clickable {
+                                    // Handle forgot password
+                                }
+                        )
+                        
                         // Error Message
                         if (authState.errorMessage.isNotEmpty()) {
                             Text(
                                 text = authState.errorMessage,
                                 color = MaterialTheme.colorScheme.error,
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 8.dp),
@@ -172,35 +199,53 @@ fun LoginScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                         
                         // Login Button
-                        LoginButton(
+                        ThemeButton(
+                            text = "Sign In",
                             onClick = {
-                                authViewModel.onEvent(AuthEvent.Login(email.trim(), password))
+                                // Try dummy credentials first
+                                if (email == DUMMY_EMAIL && password == DUMMY_PASSWORD) {
+                                    onNavigateToHome()
+                                } else {
+                                    // If not dummy credentials, use the view model
+                                    authViewModel.onEvent(AuthEvent.Login(email.trim(), password))
+                                }
                             },
                             isLoading = authState.isLoading,
                             modifier = Modifier.fillMaxWidth()
                         )
                         
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        // Forgot Password
-                        Text(
-                            text = "Forgot Password?",
-                            color = Color(0xFF1565C0),
-                            fontSize = 14.sp,
-                            modifier = Modifier.clickable {
-                                // Handle forgot password
-                            }
-                        )
-                        
                         // Demo credentials hint
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Demo: test@demo.com / 123456",
-                            color = Color.Gray,
-                            fontSize = 12.sp,
+                            text = "Demo: $DUMMY_EMAIL / $DUMMY_PASSWORD",
+                            color = TextGrey,
+                            style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center
                         )
                     }
+                }
+                
+                // Sign up text
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Don't have an account? ",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextGrey
+                    )
+                    
+                    Text(
+                        text = "Sign Up",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = NeonGreen,
+                        modifier = Modifier.clickable { onNavigateToSignUp() }
+                    )
                 }
             }
         }
@@ -211,14 +256,14 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                LottieSuccessAnimation()
+                SuccessAnimation()
             }
         }
     }
 }
 
 @Composable
-private fun CustomTextField(
+fun ThemeTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
@@ -237,7 +282,7 @@ private fun CustomTextField(
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = label,
-                tint = if (hasError) MaterialTheme.colorScheme.error else Color(0xFF1565C0)
+                tint = if (hasError) MaterialTheme.colorScheme.error else VibrantPurple
             )
         },
         trailingIcon = if (isPassword) {
@@ -246,7 +291,7 @@ private fun CustomTextField(
                     Icon(
                         imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                         contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                        tint = Color(0xFF1565C0)
+                        tint = TextGrey
                     )
                 }
             }
@@ -255,20 +300,25 @@ private fun CustomTextField(
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = if (hasError) MaterialTheme.colorScheme.error else Color(0xFF1565C0),
-            unfocusedBorderColor = if (hasError) MaterialTheme.colorScheme.error else Color.Gray,
-            focusedLabelColor = if (hasError) MaterialTheme.colorScheme.error else Color(0xFF1565C0)
+            focusedBorderColor = if (hasError) MaterialTheme.colorScheme.error else VibrantPurple,
+            unfocusedBorderColor = if (hasError) MaterialTheme.colorScheme.error else TextGrey,
+            focusedLabelColor = if (hasError) MaterialTheme.colorScheme.error else VibrantPurple,
+            unfocusedLabelColor = TextGrey,
+            cursorColor = VibrantPurple,
+            focusedTextColor = TextWhite,
+            unfocusedTextColor = TextWhite
         ),
         isError = hasError
     )
 }
 
 @Composable
-private fun LoginButton(
+fun ThemeButton(
+    text: String,
     onClick: () -> Unit,
-    isLoading: Boolean,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val scale by animateFloatAsState(
@@ -283,9 +333,9 @@ private fun LoginButton(
             .height(56.dp)
             .scale(scale),
         enabled = !isLoading,
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF1565C0)
+            containerColor = VibrantPurple
         ),
         elevation = ButtonDefaults.buttonElevation(
             defaultElevation = 4.dp,
@@ -294,54 +344,68 @@ private fun LoginButton(
     ) {
         if (isLoading) {
             CircularProgressIndicator(
-                color = Color.White,
+                color = TextWhite,
                 strokeWidth = 2.dp,
                 modifier = Modifier.size(20.dp)
             )
         } else {
             Text(
-                text = "Login",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.White
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                color = TextWhite
             )
         }
     }
 }
 
 @Composable
-private fun LottieAnimationPlaceholder(modifier: Modifier = Modifier) {
-    // Placeholder for Lottie animation - using a simple animated icon for now
-    val infiniteTransition = rememberInfiniteTransition(label = "rotation")
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
+fun LogoAnimation(modifier: Modifier = Modifier) {
+    // Animated logo with pulsing effect
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0.9f,
+        targetValue = 1.1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(3000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
         ),
-        label = "rotation"
+        label = "pulse_scale"
     )
     
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.Home,
-            contentDescription = "App Logo",
-            tint = Color.White,
+        // Background glow
+        Box(
             modifier = Modifier
-                .size(120.dp)
-                .graphicsLayer {
-                    rotationY = rotation
-                }
+                .size(100.dp)
+                .scale(scale)
+                .background(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            VibrantPurple.copy(alpha = 0.7f),
+                            VibrantPurple.copy(alpha = 0.0f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(50.dp)
+                )
+        )
+        
+        // Logo text
+        Text(
+            text = "LH",
+            style = MaterialTheme.typography.displayMedium.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = NeonGreen,
+            modifier = Modifier.scale(scale * 0.9f)
         )
     }
 }
 
 @Composable
-private fun LottieSuccessAnimation() {
+fun SuccessAnimation() {
     val infiniteTransition = rememberInfiniteTransition(label = "success")
     val scale by infiniteTransition.animateFloat(
         initialValue = 0.8f,
@@ -356,13 +420,13 @@ private fun LottieSuccessAnimation() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.3f)),
+            .background(DeepDarkBackground.copy(alpha = 0.8f)),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = "Success",
-            tint = Color.Green,
+            tint = NeonGreen,
             modifier = Modifier
                 .size(100.dp)
                 .scale(scale)
@@ -370,13 +434,6 @@ private fun LottieSuccessAnimation() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    MaterialTheme {
-        LoginScreen(
-            authViewModel = AuthViewModel(),
-            onNavigateToDashboard = {}
-        )
-    }
-}
+
+
+
