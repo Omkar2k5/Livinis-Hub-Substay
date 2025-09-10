@@ -49,6 +49,23 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    
+    // Navigation
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    
+    // ViewModel and State Management
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+    
+    // Lottie Animation
+    implementation("com.airbnb.android:lottie-compose:6.4.0")
+    
+    // Icons Extended
+    implementation("androidx.compose.material:material-icons-extended:1.6.3")
+    
+    // Firebase (for future implementation)
+    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
