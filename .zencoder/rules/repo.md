@@ -19,7 +19,7 @@ Livinns Hub Stay is an Android mobile application built with Kotlin and Jetpack 
 ## Language & Runtime
 **Language**: Kotlin
 **Version**: Kotlin 2.0.21
-**Build System**: Gradle (Kotlin DSL)
+**Build System**: Gradle (Kotlin DSL) with AGP 8.8.1
 **Package Manager**: Gradle
 
 ## Dependencies

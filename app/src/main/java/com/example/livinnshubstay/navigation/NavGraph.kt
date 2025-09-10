@@ -6,12 +6,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.livinnshubstay.ui.screens.DashboardScreen
+import com.example.livinnshubstay.ui.screens.HomeScreen
 import com.example.livinnshubstay.ui.screens.LoginScreen
 import com.example.livinnshubstay.viewmodel.AuthViewModel
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Dashboard : Screen("dashboard")
+    object Home : Screen("home")
 }
 
 @Composable
@@ -21,7 +23,8 @@ fun NavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        // Changed to start with the Home screen to showcase the new theme
+        startDestination = Screen.Home.route
     ) {
         composable(route = Screen.Login.route) {
             LoginScreen(
@@ -52,6 +55,11 @@ fun NavGraph(
                     }
                 }
             )
+        }
+        
+        composable(route = Screen.Home.route) {
+            // New Home screen with the updated theme
+            HomeScreen()
         }
     }
 }
